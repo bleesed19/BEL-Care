@@ -1,5 +1,5 @@
 // frontend/utils/api.js
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE = 'https://bel-care.onrender.com/api';
 
 async function request(endpoint, options = {}) {
     const token = localStorage.getItem('token');
@@ -34,7 +34,7 @@ export const getHospitals = async (lat, lng, emergency = false) => {
 export const getHospital = (id) => request(`/hospitals/${id}`);
 export const updateHospitalAvailability = (id, data) => request(`/hospitals/${id}/availability`, { method: 'PUT', body: JSON.stringify(data) });
 
-// Messages (Chat) – FIXED: uses correct endpoint and body
+// Messages (Chat)
 export const sendMessage = (senderId, hospitalId, message, receiverId = null) => 
     request('/messages/send', { 
         method: 'POST', 
