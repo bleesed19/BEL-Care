@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Login | BEL-CARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b3b4f 0%, #1a5f7a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .login-card {
+            background: white;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 440px;
+            padding: 2rem 2rem 2.2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease;
+        }
+
+        .login-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: #1a5f7a;
+            background: #eef2ff;
+            padding: 1rem;
+            border-radius: 60px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #5a6e7c;
+            font-size: 0.85rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #0d6efd;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 2.8rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+            background: none;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .toggle-password:hover {
+            color: #0d6efd;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 0.85rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        button[type="submit"]:hover {
+            background: #0b5ed7;
+            transform: scale(1.02);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 0.75rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #5a6e7c;
+        }
+
+        .footer-links a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-card">
+        <div class="logo">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <h2>Super Admin</h2>
+        <div class="subtitle">Access the BEL‑CARE control panel</div>
+
+        <div class="input-group">
+            <i class="fas fa-envelope"></i>
+            <input type="email" id="email" placeholder="Email address" autocomplete="off">
+        </div>
+
+        <div class="input-group password-wrapper">
+            <i class="fas fa-lock"></i>
+            <input type="password" id="password" placeholder="Password">
+            <button type="button" class="toggle-password" id="togglePassword">
+                <i class="fas fa-eye"></i>
+            </button>
+        </div>
+
+        <button type="submit" id="loginBtn">
+            <i class="fas fa-arrow-right-to-bracket"></i> Log in
+        </button>
+
+        <div id="errorMessage" class="error-message"></div>
+
+        <div class="footer-links">
+            <a href="/">← Back to main site</a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+
+        // Password visibility toggle
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+        togglePassword.addEventListener('click', () => {
+            const type = passwordInput.type === 'password' ? 'text' : 'password';
+            passwordInput.type = type;
+            togglePassword.querySelector('i').classList.toggle('fa-eye');
+            togglePassword.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+
+        // Login logic
+        const loginBtn = document.getElementById('loginBtn');
+        const emailInput = document.getElementById('email');
+        const errorDiv = document.getElementById('errorMessage');
+
+        loginBtn.addEventListener('click', async () => {
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Please enter both email and password.';
+                return;
+            }
+
+            errorDiv.style.display = 'none';
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Login failed');
+                if (data.user.role !== 'super_admin') throw new Error('Access denied: Not a super admin account');
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/superadmin.html';
+            } catch (err) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = err.message;
+                loginBtn.disabled = false;
+                loginBtn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Log in';
+            }
+        });
+
+        // Allow Enter key to submit
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+        emailInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+    </script>
+</body>
+</html>

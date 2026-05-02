@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facility Dashboard | BEL-CARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/facilityadmin.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <button class="menu-icon" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <i class="fas fa-hospital-user"></i> <span>Facility Portal</span>
+        </div>
+        <div class="user-info">
+            <span id="adminName"></span>
+            <button id="logoutBtn" class="btn btn-danger btn-sm">Logout</button>
+        </div>
+    </nav>
+
+    <div class="sidebar" id="sidebar">
+        <a data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a data-section="services"><i class="fas fa-concierge-bell"></i> Services</a>
+        <a data-section="media"><i class="fas fa-photo-video"></i> Media</a>
+        <a data-section="chat"><i class="fas fa-comments"></i> Chat</a>
+        <a data-section="ambulance"><i class="fas fa-ambulance"></i> Ambulance Requests</a>
+        <a data-section="feedback"><i class="fas fa-star"></i> Feedback</a>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <!-- Dashboard Section -->
+        <div id="dashboardSection">
+            <div class="stats-grid" id="statsGrid"></div>
+            <div class="card"><h2>Facility Overview</h2><div id="facilityInfo"></div></div>
+            <div class="card">
+                <h2>Update Availability</h2>
+                <div class="form-group"><label>Bed Availability</label><input type="number" id="bedAvailability" class="form-control"></div>
+                <div class="form-group"><label><input type="checkbox" id="emergencyReady"> Emergency Ready</label></div>
+                <button id="updateAvailabilityBtn" class="btn btn-success">Update</button>
+            </div>
+            <div class="card">
+                <h2>Payment & Activation Status</h2>
+                <div id="paymentStatus"></div>
+                <div id="paymentForms"></div>
+            </div>
+            <!-- Average Rating Card -->
+            <div class="card" id="avgRatingCard">
+                <h2>Overall Patient Rating</h2>
+                <div id="avgRatingDisplay" style="font-size: 2rem; font-weight: bold;"></div>
+            </div>
+        </div>
+
+        <!-- Services Section -->
+        <div id="servicesSection" class="hidden">
+            <div class="card"><h2>Add New Service</h2><input type="text" id="newServiceName" class="form-control" placeholder="Service name"><input type="text" id="newServiceCategory" class="form-control" placeholder="Category (optional)"><button id="addServiceBtn" class="btn btn-success">+ Add Service</button></div>
+            <div class="card"><h2>Current Services</h2><div id="servicesList"></div></div>
+        </div>
+
+        <!-- Media Section -->
+        <div id="mediaSection" class="hidden">
+            <div class="card"><input type="file" id="mediaFile" accept="image/*,video/*" class="form-control"><button id="uploadMediaBtn" class="btn btn-primary">Upload</button></div>
+            <div class="card"><h2>Media Gallery</h2><div id="mediaGallery" class="media-gallery"></div></div>
+        </div>
+
+        <!-- Chat Section -->
+        <div id="chatSection" class="hidden">
+            <div class="card"><h2>Conversations with Patients</h2><div id="conversationsList"></div></div>
+        </div>
+
+        <!-- Ambulance Requests Only -->
+        <div id="ambulanceSection" class="hidden">
+            <div class="card"><h2><i class="fas fa-ambulance"></i> Ambulance Requests</h2>
+                <table id="ambulanceTable"><thead><tr><th>User</th><th>Patient</th><th>Status</th><th>Actions</th></tr></thead><tbody></tbody></table>
+            </div>
+        </div>
+
+        <!-- Feedback Section -->
+        <div id="feedbackSection" class="hidden">
+            <div class="card"><h2>Patient Feedback & Ratings</h2><div id="feedbackList"></div></div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+        let token = localStorage.getItem('token');
+        let currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+        if (!token || currentUser.role !== 'facility_admin') { localStorage.clear(); window.location.href = '/facility-login.html'; }
+        document.getElementById('adminName').innerText = currentUser.name;
+
+        // Sidebar and outside click
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        menuToggle.addEventListener('click', () => sidebar.classList.toggle('open'));
+        document.addEventListener('click', (e) => {
+            if (sidebar.classList.contains('open') && !sidebar.contains(e.target) && !menuToggle.contains(e.target))
+                sidebar.classList.remove('open');
+        });
+
+        async function fetchJSON(url, options = {}) {
+            const res = await fetch(url, {
+                ...options,
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}`, ...options.headers }
+            });
+            if (res.status === 401 || res.status === 403) { localStorage.clear(); window.location.href = '/facility-login.html'; throw new Error('Unauthorized'); }
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
+        }
+
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])); }
+
+        // Section switching
+        const sections = ['dashboard','services','media','chat','ambulance','feedback'];
+        function showSection(section) {
+            sections.forEach(s => document.getElementById(`${s}Section`).classList.add('hidden'));
+            document.getElementById(`${section}Section`).classList.remove('hidden');
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            document.querySelector(`.sidebar a[data-section="${section}"]`).classList.add('active');
+            if (section === 'dashboard') loadDashboard();
+            if (section === 'services') loadServices();
+            if (section === 'media') loadMedia();
+            if (section === 'chat') loadConversations();
+            if (section === 'ambulance') loadAmbulanceRequests();
+            if (section === 'feedback') loadFeedback();
+        }
+        document.querySelectorAll('.sidebar a').forEach(a => a.onclick = (e) => { e.preventDefault(); showSection(a.dataset.section); if(window.innerWidth<=768) sidebar.classList.remove('open'); });
+        showSection('dashboard');
+
+        // Dashboard & Stats
+        async function loadDashboard() {
+            const facility = await fetchJSON(`${API}/facility/my-facility`);
+            document.getElementById('facilityInfo').innerHTML = `<p><strong>${escapeHtml(facility.name)}</strong><br>${escapeHtml(facility.address)}<br>📞 ${facility.phone||'N/A'}<br>🛏️ Beds: ${facility.bed_availability} | 🚨 Emergency: ${facility.emergency_ready?'Yes':'No'}</p>`;
+            document.getElementById('bedAvailability').value = facility.bed_availability;
+            document.getElementById('emergencyReady').checked = facility.emergency_ready;
+            
+            // Payment status
+            const statusDiv = document.getElementById('paymentStatus');
+            const formsDiv = document.getElementById('paymentForms');
+            const stat = facility.status || 'PENDING_REGISTRATION';
+            statusDiv.innerHTML = `<p>Status: ${stat} ${facility.subscription_expiry ? `| Expires: ${new Date(facility.subscription_expiry).toLocaleDateString()}` : ''}</p>`;
+            if (stat === 'PENDING_REGISTRATION') formsDiv.innerHTML = `<h3>Pay Registration ($10)</h3><select id="regMethod" class="form-control"><option>EcoCash</option><option>OneMoney</option></select><input id="regRef" class="form-control" placeholder="Transaction ref"><button id="submitRegPayment" class="btn btn-success">Submit</button>`;
+            else if (stat === 'APPROVED_PENDING_PAYMENT') formsDiv.innerHTML = `<h3>Pay Full Fee ($50)</h3><select id="fullMethod" class="form-control"><option>EcoCash</option><option>OneMoney</option></select><input id="fullRef" class="form-control" placeholder="Transaction ref"><button id="submitFullPayment" class="btn btn-success">Submit</button>`;
+            else formsDiv.innerHTML = '';
+            document.getElementById('submitRegPayment')?.addEventListener('click', async () => { const ref = document.getElementById('regRef').value; if(!ref) return alert('Reference required'); await fetchJSON(`${API}/payments/register`, { method:'POST', body:JSON.stringify({ method:document.getElementById('regMethod').value, transaction_reference:ref }) }); alert('Submitted'); loadDashboard(); });
+            document.getElementById('submitFullPayment')?.addEventListener('click', async () => { const ref = document.getElementById('fullRef').value; if(!ref) return alert('Reference required'); await fetchJSON(`${API}/payments/full`, { method:'POST', body:JSON.stringify({ method:document.getElementById('fullMethod').value, transaction_reference:ref }) }); alert('Submitted'); loadDashboard(); });
+
+            // Load average rating
+            const ratingData = await fetchJSON(`${API}/hospitals/${facility.id}/rating`);
+            const avgRating = parseFloat(ratingData.avg_rating).toFixed(1);
+            const starFull = '★'.repeat(Math.round(avgRating));
+            const starEmpty = '☆'.repeat(5 - Math.round(avgRating));
+            document.getElementById('avgRatingDisplay').innerHTML = `<span class="star-rating">${starFull}${starEmpty}</span> <span style="font-size:1rem;">(${avgRating}/5 from ${ratingData.total} reviews)</span>`;
+        }
+        document.getElementById('updateAvailabilityBtn').onclick = async () => {
+            await fetchJSON(`${API}/facility/update-availability`, { method:'PUT', body:JSON.stringify({ bed_availability:parseInt(document.getElementById('bedAvailability').value), emergency_ready:document.getElementById('emergencyReady').checked }) });
+            alert('Updated'); loadDashboard();
+        };
+
+        // Services (enable/disable fixed)
+        async function loadServices() {
+            const services = await fetchJSON(`${API}/facility/services`);
+            const container = document.getElementById('servicesList');
+            container.innerHTML = services.map(s => `<div class="service-item"><div><strong>${escapeHtml(s.name)}</strong><br><small>${s.category||'General'}</small><br><small>Updated: ${s.updated_at?new Date(s.updated_at).toLocaleString():'Never'}</small></div><div><button class="toggle-service btn btn-warning btn-sm" data-id="${s.id}" data-available="${s.is_available}">${s.is_available?'Disable':'Enable'}</button> <button class="remove-service btn btn-danger btn-sm" data-id="${s.id}">Remove</button></div></div>`).join('');
+            // Enable/Disable
+            document.querySelectorAll('.toggle-service').forEach(btn => {
+                btn.onclick = async () => {
+                    const newState = btn.dataset.available === 'true' ? false : true;
+                    await fetchJSON(`${API}/facility/services/${btn.dataset.id}`, { method:'PUT', body:JSON.stringify({ is_available: newState }) });
+                    loadServices();
+                };
+            });
+            document.querySelectorAll('.remove-service').forEach(btn => {
+                btn.onclick = async () => { if(confirm('Remove this service?')) { await fetchJSON(`${API}/facility/services/${btn.dataset.id}`, { method:'DELETE' }); loadServices(); } };
+            });
+        }
+        document.getElementById('addServiceBtn').onclick = async () => {
+            const name = document.getElementById('newServiceName').value;
+            if(!name) return alert('Service name required');
+            await fetchJSON(`${API}/facility/services`, { method:'POST', body:JSON.stringify({ service_name:name, category:document.getElementById('newServiceCategory').value }) });
+            loadServices();
+            document.getElementById('newServiceName').value = '';
+            document.getElementById('newServiceCategory').value = '';
+        };
+
+        // Media
+        async function loadMedia() {
+            const media = await fetchJSON(`${API}/facility/media`);
+            const gallery = document.getElementById('mediaGallery');
+            gallery.innerHTML = media.map(m => `<div class="media-item">${m.file_type==='image'?`<img src="${API.replace('/api','')}${m.file_url}">`:`<video controls src="${API.replace('/api','')}${m.file_url}"></video>`}<button class="delete-media btn btn-danger btn-sm" data-id="${m.id}">Delete</button><small>${new Date(m.created_at).toLocaleDateString()}</small></div>`).join('');
+            document.querySelectorAll('.delete-media').forEach(btn => btn.onclick = async () => { await fetchJSON(`${API}/facility/media/${btn.dataset.id}`, { method:'DELETE' }); loadMedia(); });
+        }
+        document.getElementById('uploadMediaBtn').onclick = async () => {
+            const file = document.getElementById('mediaFile').files[0];
+            if(!file) return alert('Select a file');
+            const formData = new FormData(); formData.append('file', file);
+            const res = await fetch(`${API}/facility/media`, { method:'POST', headers:{'Authorization':`Bearer ${token}`}, body:formData });
+            if(res.ok) { alert('Uploaded'); loadMedia(); } else alert('Upload failed');
+        };
+
+        // Chat
+        async function loadConversations() {
+            const messages = await fetchJSON(`${API}/facility/messages`);
+            const userMap = {};
+            messages.forEach(m => { if(!userMap[m.sender_id]) userMap[m.sender_id] = { name: m.sender_name, msgs: [] }; userMap[m.sender_id].msgs.push(m); });
+            const container = document.getElementById('conversationsList');
+            if(Object.keys(userMap).length === 0) { container.innerHTML = '<p>No messages yet.</p>'; return; }
+            container.innerHTML = Object.keys(userMap).map(uid => `<div class="card"><h3>${escapeHtml(userMap[uid].name)}</h3><div class="chat-conversation">${userMap[uid].msgs.slice().reverse().map(msg => `<div class="message ${msg.sender_id===currentUser.id?'sent':'received'}"><strong>${escapeHtml(msg.sender_name)}:</strong> ${escapeHtml(msg.message)}<br><small>${new Date(msg.created_at).toLocaleString()}</small></div>`).join('')}</div><div class="reply-area"><input id="reply-${uid}" class="form-control" placeholder="Type reply..."><button class="send-reply btn btn-primary btn-sm" data-user="${uid}">Send</button></div></div>`).join('');
+            document.querySelectorAll('.send-reply').forEach(btn => btn.onclick = async () => { const uid = btn.dataset.user; const msg = document.getElementById(`reply-${uid}`).value; if(!msg) return; await fetchJSON(`${API}/facility/messages/reply`, { method:'POST', body:JSON.stringify({ user_id: uid, message:msg }) }); document.getElementById(`reply-${uid}`).value = ''; loadConversations(); });
+        }
+
+        // Ambulance Requests only
+        async function loadAmbulanceRequests() {
+            const data = await fetchJSON(`${API}/facility/ambulance-requests`);
+            const tbody = document.querySelector('#ambulanceTable tbody');
+            tbody.innerHTML = data.map(r => `<tr>
+                <td>${escapeHtml(r.user_name)}</td>
+                <td>${escapeHtml(r.patient_name)}</td>
+                <td><span class="status-badge status-${r.status}">${r.status}</span></td>
+                <td>${r.status==='pending' ? `<button class="approve-ambulance btn btn-success btn-sm" data-id="${r.id}">Approve</button> <button class="reject-request btn btn-danger btn-sm" data-id="${r.id}">Reject</button>` : r.status==='accepted' ? `<button class="confirm-payment btn btn-warning btn-sm" data-id="${r.id}">Confirm Payment</button>` : '-'}</td>
+            </tr>`).join('');
+            attachRequestButtons();
+        }
+        function attachRequestButtons() {
+            document.querySelectorAll('.approve-ambulance').forEach(btn => btn.onclick = async () => { let notes = prompt('Notes (optional)'); await fetchJSON(`${API}/facility/requests/${btn.dataset.id}/status`, { method:'PUT', body:JSON.stringify({ status:'accepted', notes }) }); loadAmbulanceRequests(); });
+            document.querySelectorAll('.reject-request').forEach(btn => btn.onclick = async () => { let notes = prompt('Reason for rejection'); await fetchJSON(`${API}/facility/requests/${btn.dataset.id}/status`, { method:'PUT', body:JSON.stringify({ status:'rejected', notes }) }); loadAmbulanceRequests(); });
+            document.querySelectorAll('.confirm-payment').forEach(btn => btn.onclick = async () => { let token = prompt('Payment token'); if(!token) return; await fetchJSON(`${API}/facility/requests/${btn.dataset.id}/payment`, { method:'POST', body:JSON.stringify({ payment_token:token }) }); alert('Dispatched'); loadAmbulanceRequests(); });
+        }
+
+        // Feedback with average already on dashboard, but list here
+        async function loadFeedback() {
+            const facility = await fetchJSON(`${API}/facility/my-facility`);
+            const feedback = await fetchJSON(`${API}/hospitals/${facility.id}/feedback`);
+            const container = document.getElementById('feedbackList');
+            if(!feedback.length) { container.innerHTML = '<p>No feedback yet</p>'; return; }
+            container.innerHTML = feedback.map(f => `<div style="border-bottom:1px solid #e2e8f0; padding:1rem;"><strong>${escapeHtml(f.user_name)}</strong> <span class="star-rating">${'★'.repeat(f.rating)}${'☆'.repeat(5-f.rating)}</span><p>${escapeHtml(f.comment||'')}</p><small>${new Date(f.created_at).toLocaleString()}</small></div>`).join('');
+        }
+
+        document.getElementById('logoutBtn').onclick = () => { localStorage.clear(); window.location.href = '/facility-login.html'; };
+        loadDashboard();
+        setInterval(() => { if(!document.getElementById('chatSection').classList.contains('hidden')) loadConversations(); }, 8000);
+    </script>
+</body>
+</html>

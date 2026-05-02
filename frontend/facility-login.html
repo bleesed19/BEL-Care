@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facility Admin | BEL-CARE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0b3b4f 0%, #1a5f7a 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 32px;
+            width: 100%;
+            max-width: 480px;
+            padding: 2rem 2rem 2.2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-4px);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 1.25rem;
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: #1a5f7a;
+            background: #eef2ff;
+            padding: 1rem;
+            border-radius: 60px;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #5a6e7c;
+            font-size: 0.85rem;
+            margin-bottom: 1.8rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1rem;
+            pointer-events: none;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            font-family: 'Inter', sans-serif;
+            background: #f8fafc;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #0d6efd;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(13,110,253,0.1);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 2.8rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #94a3b8;
+            background: none;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .toggle-password:hover {
+            color: #0d6efd;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            background: #0d6efd;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 0.85rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        button[type="submit"]:hover {
+            background: #0b5ed7;
+            transform: scale(1.02);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #b91c1c;
+            padding: 0.75rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #dcfce7;
+            color: #166534;
+            padding: 0.75rem;
+            border-radius: 60px;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .toggle-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.85rem;
+            color: #5a6e7c;
+        }
+
+        .toggle-link a {
+            color: #0d6efd;
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .toggle-link a:hover {
+            text-decoration: underline;
+        }
+
+        .footer-link {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        .footer-link a {
+            color: #0d6efd;
+            text-decoration: none;
+        }
+
+        .footer-link a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="logo">
+            <i class="fas fa-hospital-user"></i>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm">
+            <h2>Facility Admin</h2>
+            <div class="subtitle">Sign in to manage your healthcare facility</div>
+
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="loginEmail" placeholder="Email address" autocomplete="off">
+            </div>
+
+            <div class="input-group password-wrapper">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="loginPassword" placeholder="Password">
+                <button type="button" class="toggle-password" data-target="loginPassword">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+
+            <button type="submit" id="doLogin">
+                <i class="fas fa-arrow-right-to-bracket"></i> Log in
+            </button>
+
+            <div class="toggle-link">
+                Don't have an account? <a id="showRegister">Register your facility</a>
+            </div>
+        </div>
+
+        <!-- Registration Form (hidden initially) -->
+        <div id="registerForm" style="display: none;">
+            <h2>Register Facility</h2>
+            <div class="subtitle">Create a new facility admin account</div>
+
+            <div class="input-group">
+                <i class="fas fa-user"></i>
+                <input type="text" id="regName" placeholder="Full name">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-envelope"></i>
+                <input type="email" id="regEmail" placeholder="Email address">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-phone"></i>
+                <input type="text" id="regPhone" placeholder="Phone number">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-building"></i>
+                <input type="text" id="facilityName" placeholder="Hospital / Clinic name">
+            </div>
+
+            <div class="input-group">
+                <i class="fas fa-location-dot"></i>
+                <input type="text" id="facilityAddress" placeholder="Full address">
+            </div>
+
+            <div class="input-group password-wrapper">
+                <i class="fas fa-lock"></i>
+                <input type="password" id="regPassword" placeholder="Password (min 6 characters)">
+                <button type="button" class="toggle-password" data-target="regPassword">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+
+            <button type="submit" id="doRegister">
+                <i class="fas fa-user-plus"></i> Register Facility
+            </button>
+
+            <div class="toggle-link">
+                Already have an account? <a id="showLogin">Sign in</a>
+            </div>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <div class="footer-link">
+            <a href="/">← Back to main site</a>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://localhost:5000/api';
+
+        // Password visibility toggles
+        document.querySelectorAll('.toggle-password').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetId = btn.dataset.target;
+                const input = document.getElementById(targetId);
+                const icon = btn.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+
+        // Toggle between login and registration forms
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+
+        showRegister.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        });
+
+        showLogin.addEventListener('click', () => {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        });
+
+        // Helper to show messages
+        function showError(msg) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+            setTimeout(() => errorDiv.style.display = 'none', 5000);
+        }
+
+        function showSuccess(msg) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = msg;
+            successDiv.style.display = 'block';
+            setTimeout(() => successDiv.style.display = 'none', 5000);
+        }
+
+        // Login logic
+        const doLogin = document.getElementById('doLogin');
+        doLogin.addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            if (!email || !password) {
+                showError('Please enter both email and password.');
+                return;
+            }
+
+            doLogin.disabled = true;
+            doLogin.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+
+            try {
+                const res = await fetch(`${API}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Login failed');
+                if (data.user.role !== 'facility_admin') throw new Error('Access denied: Not a facility admin account');
+                if (data.user.status === 'pending') throw new Error('Account pending approval. Contact super admin.');
+
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/facilityadmin.html';
+            } catch (err) {
+                showError(err.message);
+                doLogin.disabled = false;
+                doLogin.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i> Log in';
+            }
+        });
+
+        // Registration logic
+        const doRegister = document.getElementById('doRegister');
+        doRegister.addEventListener('click', async () => {
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const facilityName = document.getElementById('facilityName').value.trim();
+            const facilityAddress = document.getElementById('facilityAddress').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            if (!name || !email || !phone || !facilityName || !facilityAddress || !password) {
+                showError('All fields are required.');
+                return;
+            }
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+
+            doRegister.disabled = true;
+            doRegister.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+
+            try {
+                const res = await fetch(`${API}/auth/register-facility-admin`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, phone, facilityName, facilityAddress, password })
+                });
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Registration failed');
+
+                showSuccess('Registration submitted! Awaiting super admin approval.');
+                // Clear form and switch to login
+                document.getElementById('regName').value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPhone').value = '';
+                document.getElementById('facilityName').value = '';
+                document.getElementById('facilityAddress').value = '';
+                document.getElementById('regPassword').value = '';
+                setTimeout(() => {
+                    registerForm.style.display = 'none';
+                    loginForm.style.display = 'block';
+                }, 2000);
+            } catch (err) {
+                showError(err.message);
+            } finally {
+                doRegister.disabled = false;
+                doRegister.innerHTML = '<i class="fas fa-user-plus"></i> Register Facility';
+            }
+        });
+
+        // Allow Enter key on login form
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        loginPassword.addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin.click(); });
+        loginEmail.addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin.click(); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+/* superadmin.css – BEL-CARE Super Admin Dashboard */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #f0f4f8;
+    overflow-x: hidden;
+}
+
+/* Navbar */
+.navbar {
+    background: linear-gradient(135deg, #0b3b4f, #1a5f7a);
+    color: white;
+    padding: 0.9rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.menu-icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+    background: none;
+    border: none;
+    color: white;
+    margin-right: 1rem;
+}
+
+.logo {
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+
+/* Sidebar */
+.sidebar {
+    position: fixed;
+    top: 70px;
+    left: -280px;
+    width: 280px;
+    height: calc(100% - 70px);
+    background: #1e2a3a;
+    color: #e0e4e8;
+    transition: 0.3s ease;
+    z-index: 999;
+    overflow-y: auto;
+    box-shadow: 2px 0 12px rgba(0,0,0,0.1);
+}
+
+.sidebar.open { left: 0; }
+
+.sidebar a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1rem 1.5rem;
+    color: #cfdde6;
+    text-decoration: none;
+    transition: 0.2s;
+    border-left: 3px solid transparent;
+}
+
+.sidebar a i { width: 24px; font-size: 1.1rem; }
+.sidebar a:hover, .sidebar a.active {
+    background: #2c3e50;
+    color: white;
+    border-left-color: #0d6efd;
+}
+
+/* Main content */
+.main-content {
+    margin-top: 70px;
+    padding: 2rem;
+    transition: margin-left 0.3s;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 24px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.stat-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #0d6efd;
+}
+
+.stat-label {
+    color: #5a6e7c;
+    margin-top: 0.5rem;
+}
+
+/* Cards */
+.card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.card h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1.2rem;
+    color: #1a2c3e;
+    font-weight: 600;
+}
+
+/* Tables */
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 0.9rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.4rem 0.9rem;
+    border-radius: 40px;
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.8rem;
+}
+
+.btn-primary { background: #0d6efd; color: white; }
+.btn-primary:hover { background: #0b5ed7; }
+
+.btn-success { background: #198754; color: white; }
+.btn-success:hover { background: #157347; }
+
+.btn-danger { background: #dc3545; color: white; }
+.btn-danger:hover { background: #bb2d3b; }
+
+.btn-warning { background: #ffc107; color: #2c3e50; }
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1100;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 1.8rem;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.modal-content input, .modal-content select {
+    width: 100%;
+    padding: 0.6rem;
+    margin-bottom: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 40px;
+}
+
+.close {
+    float: right;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #aaa;
+}
+
+/* Hidden */
+.hidden {
+    display: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .main-content { padding: 1rem; }
+    .sidebar { width: 260px; }
+}

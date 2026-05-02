@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>BEL-CARE MedAccess | Zimbabwe Healthcare Network</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div id="app">
+        <nav class="navbar">
+            <div class="logo"><i class="fas fa-heartbeat"></i><span>BEL-CARE MedAccess</span></div>
+            <div class="nav-controls">
+                <select id="languageToggle" class="lang-select"><option value="en">English</option><option value="sn">Shona</option><option value="nd">Ndebele</option></select>
+                <button id="emergencyModeBtn" class="emergency-btn"><i class="fas fa-ambulance"></i> <span>Emergency Mode</span></button>
+                <div id="authButtons"><button id="loginBtn" class="btn-outline">Login</button><button id="registerBtn" class="btn-primary">Register</button></div>
+                <div id="userInfo" style="display:none"><span id="userName"></span><button id="logoutBtn" class="btn-outline-sm">Logout</button></div>
+            </div>
+        </nav>
+        <div class="main-container">
+            <aside class="sidebar" id="sidebar">
+                <div class="search-section">
+                    <input type="text" id="smartSearch" placeholder="🔍 Search hospital or service..." autocomplete="off">
+                    <div id="autocompleteSuggestions" class="autocomplete-box"></div>
+                    <div id="didYouMean" class="didyoumean"></div>
+                </div>
+                <div id="resultsList" class="results-list"><div class="loading">Loading hospitals...</div></div>
+            </aside>
+            <main class="map-container">
+                <div id="map"></div>
+                <div id="routeInfo" class="route-panel hidden">
+                    <div style="display:flex;justify-content:space-between;align-items:center;">
+                        <div><button id="startAudioBtn" class="btn-sm"><i class="fas fa-volume-up"></i> Audio</button><button id="stopAudioBtn" class="btn-sm" style="background:#dc3545;"><i class="fas fa-stop"></i> Stop</button></div>
+                        <button id="cancelDirectionsBtn" class="cancel-x" title="Cancel directions"><i class="fas fa-times"></i></button>
+                    </div>
+                    <div id="stepsList" style="margin-top:8px;"></div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Floating Chat Window -->
+        <div id="floatingChat" class="floating-chat hidden">
+            <div class="chat-header" id="chatHeader">
+                <span id="chatHospitalName">Chat</span>
+                <div>
+                    <button id="minimizeChatBtn"><i class="fas fa-minus"></i></button>
+                    <button id="closeChatBtn"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type a message..." />
+                <button id="sendMsgBtn"><i class="fas fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- Auth Modal -->
+        <div id="authModal" class="modal hidden">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <div id="loginForm">
+                    <h2>Login to BEL-CARE</h2>
+                    <input type="email" id="loginEmail" placeholder="Email Address">
+                    <div class="password-wrapper"><input type="password" id="loginPassword" placeholder="Password"><span class="password-toggle" data-target="loginPassword"><i class="fas fa-eye"></i></span></div>
+                    <button id="submitLogin">Login</button>
+                    <p><a href="#" id="forgotPasswordLink">Forgot Password?</a></p>
+                    <p>Don't have an account? <a href="#" id="switchToRegister">Register now</a></p>
+                </div>
+                <div id="registerForm" class="hidden">
+                    <h2>Create Patient Account</h2>
+                    <input type="text" id="regFullName" placeholder="Full Name">
+                    <input type="email" id="regEmail" placeholder="Email Address">
+                    <input type="text" id="regPhone" placeholder="Phone Number">
+                    <div class="password-wrapper"><input type="password" id="regPassword" placeholder="Password (min 6 characters)"><span class="password-toggle" data-target="regPassword"><i class="fas fa-eye"></i></span></div>
+                    <button id="submitRegister">Create Account</button>
+                    <p>Already have an account? <a href="#" id="switchToLogin">Login</a></p>
+                </div>
+                <div id="forgotPasswordForm" class="hidden">
+                    <h2>Reset Password</h2>
+                    <p>Enter your email to receive reset instructions</p>
+                    <input type="email" id="forgotEmail" placeholder="Email Address">
+                    <button id="submitForgot">Send Reset Link</button>
+                    <p><a href="#" id="backToLogin">Back to Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Password toggle
+        document.querySelectorAll('.password-toggle').forEach(toggle => {
+            toggle.addEventListener('click', function(e){
+                e.preventDefault();
+                const targetId = this.dataset.target;
+                const input = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                if(input.type === 'password'){
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
+            });
+        });
+        // Close modal
+        const modal = document.getElementById('authModal');
+        const closeSpan = modal?.querySelector('.close');
+        closeSpan?.addEventListener('click', () => modal.classList.add('hidden'));
+        window.addEventListener('click', (e) => { if(e.target === modal) modal.classList.add('hidden'); });
+    </script>
+    <script type="module" src="/main.js"></script>
+</body>
+</html>

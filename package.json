@@ -1,0 +1,26 @@
+{
+  "name": "bel-care-medaccess",
+  "version": "1.0.0",
+  "description": "BEL-CARE MedAccess - Zimbabwe Healthcare Network Platform",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install && cd backend && npm install && cd ../frontend && npm install",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build:frontend": "cd frontend && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "keywords": [
+    "healthcare",
+    "zimbabwe",
+    "hospitals",
+    "medical",
+    "emergency"
+  ],
+  "author": "BEL-CARE Team",
+  "license": "MIT"
+}
