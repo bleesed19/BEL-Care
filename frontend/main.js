@@ -14,7 +14,7 @@ let socket = null;
 let emergencyModeActive = false;
 let searchInitialised = false;
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://bel-care.onrender.com/api';
 
 async function fetchJSON(url, options = {}) {
     const token = localStorage.getItem('token');
