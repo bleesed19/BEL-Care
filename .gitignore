@@ -2,4 +2,3 @@ node_modules/
 .env 
 uploads/ 
 .DS_Store 
-dist/ 
